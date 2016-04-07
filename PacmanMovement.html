@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<canvas id = "PacScreen" width = 500px height = 500px
+        style="border:10px solid dimgray;" ></canvas>
+
+<title>PAC-MAN</title>
+
+<body>
+
+<script id = "Pacman">
+    var canvas = document.getElementById("PacScreen");
+    var ctx = canvas.getContext("2d");
+
+    var dotArray = [];
+    var x = Math.round(canvas.width / 2);
+    var y = Math.round(canvas.height / 2) - 75;
+
+    initDotArray();
+    placeBackground();
+    placePacman("r");
+
+    document.onkeydown = checkKey;
+
+    var open = true;
+    var stage = 0;
+
+    function checkKey(e) {
+        if (e.keyCode == '38') {
+            clearCanvas();
+            placeBackground();
+            if (y > 25 && isOnTrack(x, y - 5)) y -= 5;
+            open ? placePacman("u") : placePaclosed();
+            if (stage == 3) {
+                open = !open;
+                stage = 0;
+            }
+            stage++;
+        }
+        else if (e.keyCode == '40') {
+            clearCanvas();
+            placeBackground();
+            if (y < (canvas.height - 25) && isOnTrack(x, y + 5)) y += 5;
+            open ? placePacman("d") : placePaclosed();
+            if (stage == 3) {
+                open = !open;
+                stage = 0;
+            }
+            stage++;
+        }
+        else if (e.keyCode == '37') {
+            clearCanvas();
+            placeBackground();
+            if (x > 25 && isOnTrack(x - 5, y)) x -= 5;
+            open ? placePacman("l") : placePaclosed();
+            if (stage == 3) {
+                open = !open;
+                stage = 0;
+            }
+            stage++;
+        }
+        else if (e.keyCode == '39') {
+            clearCanvas();
+            placeBackground();
+            if (x < (canvas.width - 25) && isOnTrack(x + 5, y)) x += 5;
+            open ? placePacman("r") : placePaclosed();
+            if (stage == 3) {
+                open = !open;
+                stage = 0;
+            }
+            stage++;
+        }
+
+    }
+
+    function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.beginPath();
+    }
+
+    function placePacman(dir) {
+        ctx.moveTo(x, y);
+        switch (dir) {
+            case 'u':
+                ctx.arc(x, y, 23, (1.75 * Math.PI), (1.25 * Math.PI));
+                break;
+            case 'd':
+                ctx.arc(x, y, 23, (0.75 * Math.PI), (0.25 * Math.PI));
+                break;
+            case 'l':
+                ctx.arc(x, y, 23, (1.25 * Math.PI), (0.75 * Math.PI));
+                break;
+            case 'r':
+                ctx.arc(x, y, 23, (0.25 * Math.PI), (1.75 * Math.PI));
+                break;
+        }
+        ctx.fillStyle = "yellow";
+        ctx.lineTo(x, y);
+        ctx.closePath();
+        ctx.strokeStyle = "black";
+        ctx.stroke();
+        ctx.fill();
+    }
+
+    function placePaclosed() {
+        ctx.fillStyle = "yellow";
+        ctx.arc(x, y, 23, 0, (2 * Math.PI));
+        ctx.strokeStyle = "black";
+        ctx.stroke();
+        ctx.fill();
+    }
+
+    function placeBackground() {
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "gray";
+        ctx.fillRect(50, ((canvas.height / 2) - 50), canvas.width - 100, 100);
+
+        ctx.fillRect(50, 50, (canvas.width / 2 - 75), 100);
+        ctx.fillRect(50, canvas.height - 150, (canvas.width / 2 - 75), 100);
+        ctx.fillRect(canvas.width / 2 + 25, 50, (canvas.width / 2 - 75), 100);
+        ctx.fillRect((canvas.width / 2 + 25), canvas.height - 150,
+                (canvas.width / 2 - 75), 100);
+
+        placeDots();
+    }
+
+    function distance(x1, y1, x2, y2) {
+        return (Math.sqrt( Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)));
+    }
+
+    function onLine(a, b, x1, y1, x2, y2){
+        var dAC = distance(a, b, x1, y1);
+        var dBC = distance(a, b, x2, y2);
+        var dAB = distance(x1, y1, x2, y2);
+        return (Math.round(dAB) == Math.round(dBC + dAC));
+    }
+
+    function isOnTrack(a, b) {
+        var l1 = onLine(a, b, 25, 25, 25, canvas.height - 25);
+        var l2 = onLine(a, b, canvas.width - 25, 25, canvas.width - 25, canvas.height - 25);
+        var l3 = onLine(a, b, 25, 25, canvas.width - 25, 25);
+        var l4 = onLine(a, b, 25, canvas.height / 2 - 75, canvas.width - 25, canvas.height / 2 - 75);
+        var l5 = onLine(a, b, 25, canvas.height / 2 + 75, canvas.width - 25, canvas.height / 2 + 75);
+        var l6 = onLine(a, b, 25, canvas.height - 25, canvas.width - 25, canvas.height - 25);
+        var l7 = onLine(a, b, canvas.width / 2, 25, canvas.width / 2, canvas.height / 2 - 75);
+        var l8 = onLine(a, b, canvas.width / 2, canvas.height / 2 + 75, canvas.width / 2, canvas.height - 25);
+        return (l1 || l2 || l3 || l4 || l5 || l6 || l7 || l8);
+    }
+
+    function initDotArray() {
+        for (var i = 50; i <= canvas.width - 50; i += 25) {
+            dotArray.push([i, 25]);
+            dotArray.push([i, (canvas.height / 2) - 75]);
+            dotArray.push([i, (canvas.height / 2) + 75]);
+            dotArray.push([i, canvas.height - 25]);
+        }
+        for(var j = 25; j <= canvas.height - 25; j += 25) {
+            dotArray.push([25, j]);
+            dotArray.push([canvas.width - 25, j]);
+        }
+        for(var k = 50; k <= 150; k += 25) {
+            dotArray.push([canvas.width / 2, k]);
+            dotArray.push([canvas.width / 2, canvas.height - k]);
+        }
+    }
+
+    function placeDots() {
+        ctx.fillStyle = "green";
+        ctx.strokeStyle = "yellow";
+        for(var i = 0; i < dotArray.length; i++)
+        {
+            var dotx = dotArray[i][0];
+            var doty = dotArray[i][1];
+            ctx.moveTo(dotx, doty);
+            ctx.arc(dotx, doty, 2, 0, 2 * Math.PI);
+            ctx.stroke();
+        }
+    }
+
+</script>
+</body>
+</html>
