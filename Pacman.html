@@ -121,8 +121,6 @@
         ctx.fillRect(canvas.width / 2 + 25, 50, (canvas.width / 2 - 75), 100);
         ctx.fillRect((canvas.width / 2 + 25), canvas.height - 150,
                 (canvas.width / 2 - 75), 100);
-
-        //placeDots();
     }
 
     function distance(x1, y1, x2, y2) {
@@ -133,7 +131,7 @@
         var dAC = distance(a, b, x1, y1);
         var dBC = distance(a, b, x2, y2);
         var dAB = distance(x1, y1, x2, y2);
-        return (Math.round(dAB) == Math.round(dBC + dAC));
+        return (dAB == dAC + dBC);
     }
 
     function isOnTrack(a, b) {
