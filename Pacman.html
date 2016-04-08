@@ -4,8 +4,8 @@
 <head>
     <style>
         body {
-            margin: 75px;
-            padding: 0px 0px 0px 300px;
+            margin: 50px;
+            padding: 0 0 0 300px;
         }
     </style>
 
@@ -17,9 +17,7 @@
 <canvas id = "PacScreen" width = 500px height = 500px
         style="border:10px solid dimgray;" ></canvas>
 
-
 <body>
-
 <script id = "Pacman">
     var canvas = document.getElementById("PacScreen");
     var ctx = canvas.getContext("2d");
@@ -65,12 +63,14 @@
             open ? placePacman("r") : placePaclosed();
         }
         else placePaclosed();
-
+        eatDots();
         if (stage == 3) {
             open = !open;
             stage = 0;
         }
         stage++;
+
+        if(dotArray.length == 0) alert("You win!");
     }
 
     function clearCanvas() {
@@ -114,13 +114,15 @@
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = "gray";
+        ctx.strokeStyle = "gray";
+        //ctx.lineWidth = 10;
         ctx.fillRect(50, ((canvas.height / 2) - 50), canvas.width - 100, 100);
-
         ctx.fillRect(50, 50, (canvas.width / 2 - 75), 100);
         ctx.fillRect(50, canvas.height - 150, (canvas.width / 2 - 75), 100);
         ctx.fillRect(canvas.width / 2 + 25, 50, (canvas.width / 2 - 75), 100);
         ctx.fillRect((canvas.width / 2 + 25), canvas.height - 150,
                 (canvas.width / 2 - 75), 100);
+
     }
 
     function distance(x1, y1, x2, y2) {
@@ -131,7 +133,7 @@
         var dAC = distance(a, b, x1, y1);
         var dBC = distance(a, b, x2, y2);
         var dAB = distance(x1, y1, x2, y2);
-        return (dAB == dAC + dBC);
+        return (dAB == dBC + dAC);
     }
 
     function isOnTrack(a, b) {
@@ -162,7 +164,10 @@
             dotArray.push([canvas.width / 2, canvas.height - k]);
         }
 
-        delElem([25, 25]);
+        delElem([canvas.width / 2, 175]);
+        delElem([canvas.width / 2 - 25, 175]);
+        delElem([canvas.width / 2 + 25, 175]);
+        delElem([canvas.width / 2, 150]);
     }
 
     function placeDots() {
@@ -178,15 +183,23 @@
     }
 
     function delElem(elem) {
-        var pos = -1;
         for(var i = 0; i < dotArray.length; i++){
-            if(dotArray[i] == elem) {
-                pos = i;
+            if((elem[0] == dotArray[i][0]) && (elem[1] == dotArray[i][1])) {
+                delete dotArray[i];
+                dotArray.sort();
+                dotArray.pop();
                 break;
             }
         }
-        if(pos != -1)
-                dotArray.splice(pos, 1);
+
+    }
+
+    function eatDots() {
+        for(var i = 0; i < dotArray.length; i++) {
+            if((x == dotArray[i][0]) && y == (dotArray[i][1])) {
+                delElem([dotArray[i][0], dotArray[i][1]]);
+            }
+        }
     }
 
 </script>
