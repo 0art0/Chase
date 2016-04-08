@@ -4,11 +4,11 @@
 <head>
     <style>
         body {
-            margin: 50px;
+            margin: 75px;
             padding: 0px 0px 0px 300px;
         }
     </style>
-    
+
     <meta charset="UTF-8">
 
     <title>PAC-MAN</title>
@@ -16,6 +16,7 @@
 
 <canvas id = "PacScreen" width = 500px height = 500px
         style="border:10px solid dimgray;" ></canvas>
+
 
 <body>
 
@@ -29,6 +30,7 @@
 
     initDotArray();
     placeBackground();
+    placeDots();
     placePacman("r");
 
     document.onkeydown = checkKey;
@@ -37,51 +39,38 @@
     var stage = 0;
 
     function checkKey(e) {
-        if (e.keyCode == '38') {
-            clearCanvas();
-            placeBackground();
+        clearCanvas();
+        placeBackground();
+        placeDots();
+        ctx.moveTo(x, y);
+        ctx.beginPath();
+        //up
+        if (e.keyCode == '38' || e.keyCode == '119' || e.keyCode == '87') {
             if (y > 25 && isOnTrack(x, y - 5)) y -= 5;
             open ? placePacman("u") : placePaclosed();
-            if (stage == 3) {
-                open = !open;
-                stage = 0;
-            }
-            stage++;
         }
-        else if (e.keyCode == '40') {
-            clearCanvas();
-            placeBackground();
+        //down
+        else if (e.keyCode == '40' || e.keyCode == '115' || e.keyCode == '83') {
             if (y < (canvas.height - 25) && isOnTrack(x, y + 5)) y += 5;
             open ? placePacman("d") : placePaclosed();
-            if (stage == 3) {
-                open = !open;
-                stage = 0;
-            }
-            stage++;
         }
-        else if (e.keyCode == '37') {
-            clearCanvas();
-            placeBackground();
+        //left
+        else if (e.keyCode == '37'  || e.keyCode == '97' || e.keyCode == '65') {
             if (x > 25 && isOnTrack(x - 5, y)) x -= 5;
             open ? placePacman("l") : placePaclosed();
-            if (stage == 3) {
-                open = !open;
-                stage = 0;
-            }
-            stage++;
         }
-        else if (e.keyCode == '39') {
-            clearCanvas();
-            placeBackground();
+        //right
+        else if (e.keyCode == '39' || e.keyCode == '100' || e.keyCode == '68') {
             if (x < (canvas.width - 25) && isOnTrack(x + 5, y)) x += 5;
             open ? placePacman("r") : placePaclosed();
-            if (stage == 3) {
-                open = !open;
-                stage = 0;
-            }
-            stage++;
         }
+        else placePaclosed();
 
+        if (stage == 3) {
+            open = !open;
+            stage = 0;
+        }
+        stage++;
     }
 
     function clearCanvas() {
@@ -132,6 +121,8 @@
         ctx.fillRect(canvas.width / 2 + 25, 50, (canvas.width / 2 - 75), 100);
         ctx.fillRect((canvas.width / 2 + 25), canvas.height - 150,
                 (canvas.width / 2 - 75), 100);
+
+        //placeDots();
     }
 
     function distance(x1, y1, x2, y2) {
@@ -172,18 +163,32 @@
             dotArray.push([canvas.width / 2, k]);
             dotArray.push([canvas.width / 2, canvas.height - k]);
         }
+
+        delElem([25, 25]);
     }
 
     function placeDots() {
-        ctx.strokeStyle = "yellow";
         for(var i = 0; i < dotArray.length; i++)
         {
             var dotx = dotArray[i][0];
             var doty = dotArray[i][1];
             ctx.moveTo(dotx, doty);
             ctx.arc(dotx, doty, 2, 0, 2 * Math.PI);
-            ctx.stroke();
         }
+        ctx.strokeStyle = "yellow";
+        ctx.stroke();
+    }
+
+    function delElem(elem) {
+        var pos = -1;
+        for(var i = 0; i < dotArray.length; i++){
+            if(dotArray[i] == elem) {
+                pos = i;
+                break;
+            }
+        }
+        if(pos != -1)
+                dotArray.splice(pos, 1);
     }
 
 </script>
