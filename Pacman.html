@@ -15,24 +15,25 @@
 </head>
 
 <canvas id = "PacScreen" width = 500px height = 500px
-        style="border:10px solid dimgray;" ></canvas>
+        style="border:10px solid blue;" ></canvas>
 
-<body>
+<body bgcolor="black">
 <script id = "Pacman">
     var canvas = document.getElementById("PacScreen");
     var ctx = canvas.getContext("2d");
 
+    var l = 500; // width/height of the canvas
+    var x = 250;
+    var y = 175;
     var dotArray = [];
-    var x = Math.round(canvas.width / 2);
-    var y = Math.round(canvas.height / 2) - 75;
+    var powerDotArray = [[25, 75], [l - 25, 75], [25, l - 125], [l - 25, l - 125]];
 
     initDotArray();
     placeBackground();
     placeDots();
-    placePacman("r");
+    checkKey('e');
 
     document.onkeydown = checkKey;
-
     var open = true;
     var stage = 0;
 
@@ -49,7 +50,7 @@
         }
         //down
         else if (e.keyCode == '40' || e.keyCode == '115' || e.keyCode == '83') {
-            if (y < (canvas.height - 25) && isOnTrack(x, y + 5)) y += 5;
+            if (y < (l - 25) && isOnTrack(x, y + 5)) y += 5;
             open ? placePacman("d") : placePaclosed();
         }
         //left
@@ -59,22 +60,31 @@
         }
         //right
         else if (e.keyCode == '39' || e.keyCode == '100' || e.keyCode == '68') {
-            if (x < (canvas.width - 25) && isOnTrack(x + 5, y)) x += 5;
+            if (x < (l - 25) && isOnTrack(x + 5, y)) x += 5;
             open ? placePacman("r") : placePaclosed();
         }
+        //reload
+        else if(e.keyCode == '114' || e.keyCode == '82') {
+            window.location.reload();
+        }
+
         else placePaclosed();
         eatDots();
+        eatPowerDots();
         if (stage == 3) {
             open = !open;
             stage = 0;
         }
         stage++;
 
-        if(dotArray.length == 0) alert("You win!");
+        if(dotArray.length == 0 && powerDotArray.length == 0) {
+            alert("You win!");
+            window.location.reload();
+        }
     }
 
     function clearCanvas() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, l, l);
         ctx.beginPath();
     }
 
@@ -82,92 +92,92 @@
         ctx.moveTo(x, y);
         switch (dir) {
             case 'u':
-                ctx.arc(x, y, 23, (1.75 * Math.PI), (1.25 * Math.PI));
+                ctx.arc(x, y, 18, (1.75 * Math.PI), (1.25 * Math.PI));
                 break;
             case 'd':
-                ctx.arc(x, y, 23, (0.75 * Math.PI), (0.25 * Math.PI));
+                ctx.arc(x, y, 18, (0.75 * Math.PI), (0.25 * Math.PI));
                 break;
             case 'l':
-                ctx.arc(x, y, 23, (1.25 * Math.PI), (0.75 * Math.PI));
+                ctx.arc(x, y, 18, (1.25 * Math.PI), (0.75 * Math.PI));
                 break;
             case 'r':
-                ctx.arc(x, y, 23, (0.25 * Math.PI), (1.75 * Math.PI));
+                ctx.arc(x, y, 18, (0.25 * Math.PI), (1.75 * Math.PI));
                 break;
         }
-        ctx.fillStyle = "yellow";
         ctx.lineTo(x, y);
         ctx.closePath();
-        ctx.strokeStyle = "black";
+        ctx.lineWidth = 8;
+        ctx.strokeStyle = "yellow";
         ctx.stroke();
-        ctx.fill();
+        ctx.lineWidth = 1;
     }
 
     function placePaclosed() {
         ctx.fillStyle = "yellow";
-        ctx.arc(x, y, 23, 0, (2 * Math.PI));
-        ctx.strokeStyle = "black";
-        ctx.stroke();
+        ctx.arc(x, y, 18, 0, (2 * Math.PI));
         ctx.fill();
     }
 
     function placeBackground() {
         ctx.fillStyle = "black";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, l, l);
         ctx.fillStyle = "gray";
-        ctx.strokeStyle = "gray";
-        //ctx.lineWidth = 10;
-        ctx.fillRect(50, ((canvas.height / 2) - 50), canvas.width - 100, 100);
-        ctx.fillRect(50, 50, (canvas.width / 2 - 75), 100);
-        ctx.fillRect(50, canvas.height - 150, (canvas.width / 2 - 75), 100);
-        ctx.fillRect(canvas.width / 2 + 25, 50, (canvas.width / 2 - 75), 100);
-        ctx.fillRect((canvas.width / 2 + 25), canvas.height - 150,
-                (canvas.width / 2 - 75), 100);
-
+        ctx.strokeStyle = "blue";
+        ctx.lineWidth = 7;
+        ctx.strokeRect(50, ((l / 2) - 50), l - 100, 100);
+        ctx.strokeRect(50, 50, (l / 2 - 75), 100);
+        ctx.strokeRect(50, l - 150, (l / 2 - 75), 100);
+        ctx.strokeRect(l / 2 + 25, 50, (l / 2 - 75), 100);
+        ctx.strokeRect((l / 2 + 25), l - 150,
+                (l / 2 - 75), 100);
     }
 
     function distance(x1, y1, x2, y2) {
         return (Math.sqrt( Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)));
     }
 
-    function onLine(a, b, x1, y1, x2, y2){
-        var dAC = distance(a, b, x1, y1);
-        var dBC = distance(a, b, x2, y2);
-        var dAB = distance(x1, y1, x2, y2);
-        return (dAB == dBC + dAC);
+    function onLine(a, b, x1, y1, x2, y2) {
+        return (distance(x1, y1, x2, y2) == distance(a, b, x2, y2) + distance(a, b, x1, y1));
     }
 
     function isOnTrack(a, b) {
-        var l1 = onLine(a, b, 25, 25, 25, canvas.height - 25);
-        var l2 = onLine(a, b, canvas.width - 25, 25, canvas.width - 25, canvas.height - 25);
-        var l3 = onLine(a, b, 25, 25, canvas.width - 25, 25);
-        var l4 = onLine(a, b, 25, canvas.height / 2 - 75, canvas.width - 25, canvas.height / 2 - 75);
-        var l5 = onLine(a, b, 25, canvas.height / 2 + 75, canvas.width - 25, canvas.height / 2 + 75);
-        var l6 = onLine(a, b, 25, canvas.height - 25, canvas.width - 25, canvas.height - 25);
-        var l7 = onLine(a, b, canvas.width / 2, 25, canvas.width / 2, canvas.height / 2 - 75);
-        var l8 = onLine(a, b, canvas.width / 2, canvas.height / 2 + 75, canvas.width / 2, canvas.height - 25);
-        return (l1 || l2 || l3 || l4 || l5 || l6 || l7 || l8);
+        var onTrack = false;
+        if(onLine(a, b, 25, 25, 25, l - 25)) onTrack = true;
+        else if(onLine(a, b, l - 25, 25, l - 25, l - 25)) onTrack = true;
+        else if(onLine(a, b, 25, 25, l - 25, 25)) onTrack = true;
+        else if(onLine(a, b, 25, l / 2 - 75, l - 25, l / 2 - 75)) onTrack = true;
+        else if (onLine(a, b, 25, l / 2 + 75, l - 25, l / 2 + 75)) onTrack  = true;
+        else if (onLine(a, b, 25, l - 25, l - 25, l - 25)) onTrack = true;
+        else if(onLine(a, b, l / 2, 25, l / 2, l / 2 - 75)) onTrack = true;
+        else if(onLine(a, b, l / 2, l / 2 + 75, l / 2, l - 25)) onTrack = true;
+        return onTrack;
     }
 
     function initDotArray() {
-        for (var i = 50; i <= canvas.width - 50; i += 25) {
+        for (var i = 50; i <= l - 50; i += 25) {
             dotArray.push([i, 25]);
-            dotArray.push([i, (canvas.height / 2) - 75]);
-            dotArray.push([i, (canvas.height / 2) + 75]);
-            dotArray.push([i, canvas.height - 25]);
+            dotArray.push([i, (l / 2) - 75]);
+            dotArray.push([i, (l / 2) + 75]);
+            dotArray.push([i, l - 25]);
         }
-        for(var j = 25; j <= canvas.height - 25; j += 25) {
+        for(var j = 25; j <= l - 25; j += 25) {
             dotArray.push([25, j]);
-            dotArray.push([canvas.width - 25, j]);
+            dotArray.push([l - 25, j]);
         }
         for(var k = 50; k <= 150; k += 25) {
-            dotArray.push([canvas.width / 2, k]);
-            dotArray.push([canvas.width / 2, canvas.height - k]);
+            dotArray.push([l / 2, k]);
+            dotArray.push([l / 2, l - k]);
         }
 
-        delElem([canvas.width / 2, 175]);
-        delElem([canvas.width / 2 - 25, 175]);
-        delElem([canvas.width / 2 + 25, 175]);
-        delElem([canvas.width / 2, 150]);
+        delElem([l / 2, 175], dotArray);
+        delElem([l / 2 - 25, 175], dotArray);
+        delElem([l / 2 + 25, 175], dotArray);
+        delElem([l / 2, 150], dotArray);
+
+        delElem([25, 75], dotArray);
+        delElem([l - 25, 75], dotArray);
+        delElem([25, l - 125], dotArray);
+        delElem([l - 25, l - 125], dotArray);
     }
 
     function placeDots() {
@@ -178,16 +188,27 @@
             ctx.moveTo(dotx, doty);
             ctx.arc(dotx, doty, 2, 0, 2 * Math.PI);
         }
-        ctx.strokeStyle = "yellow";
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "white";
         ctx.stroke();
+        ctx.lineWidth = 1;
+
+        for(var j = 0; j < powerDotArray.length; j++) {
+            var pdotx = powerDotArray[j][0];
+            var pdoty = powerDotArray[j][1];
+            ctx.moveTo(pdotx, pdoty);
+            ctx.arc(pdotx, pdoty, 8, 0, 2 * Math.PI);
+        }
+        ctx.fillStyle = "orange";
+        ctx.fill();
     }
 
-    function delElem(elem) {
-        for(var i = 0; i < dotArray.length; i++){
-            if((elem[0] == dotArray[i][0]) && (elem[1] == dotArray[i][1])) {
-                delete dotArray[i];
-                dotArray.sort();
-                dotArray.pop();
+    function delElem(elem, array) {
+        for(var i = 0; i < array.length; i++) {
+            if((elem[0] == array[i][0]) && (elem[1] == array[i][1])) {
+                delete array[i];
+                array.sort();
+                array.pop();
                 break;
             }
         }
@@ -196,8 +217,16 @@
 
     function eatDots() {
         for(var i = 0; i < dotArray.length; i++) {
-            if((x == dotArray[i][0]) && y == (dotArray[i][1])) {
-                delElem([dotArray[i][0], dotArray[i][1]]);
+            if ((x == dotArray[i][0]) && y == (dotArray[i][1]))
+                delElem([dotArray[i][0], dotArray[i][1]], dotArray);
+        }
+    }
+
+    function eatPowerDots() {
+        for (var i = 0; i < powerDotArray.length; i++) {
+            if ((x == powerDotArray[i][0]) && y == (powerDotArray[i][1])) {
+            delElem([powerDotArray[i][0], powerDotArray[i][1]], powerDotArray);
+            //insert code for fright mode of monsters
             }
         }
     }
