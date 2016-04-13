@@ -37,6 +37,32 @@
     var open = true;
     var stage = 0;
 
+        function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+        if (typeof stroke == "undefined" ) {
+            stroke = true;
+        }
+        if (typeof radius === "undefined") {
+            radius = 5;
+        }
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + width - radius, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+        ctx.lineTo(x + width, y + height - radius);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        ctx.lineTo(x + radius, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+        if (stroke) {
+            ctx.stroke();
+        }
+        if (fill) {
+            ctx.fill();
+        }
+    }   
+
     function checkKey(e) {
         //clearCanvas();
         //placeBackground();
@@ -116,29 +142,35 @@
     }
 
     function placeBackground() {
-        ctx.fillStyle = "black";
+ctx.fillStyle = "black";
         ctx.fillRect(0, 0, l, l);
         ctx.fillStyle = "blue";
         ctx.strokeStyle = "blue";
         ctx.lineWidth = 7;
-        ctx.fillRect(0, 0, 25, l / 2 - 25);
-        ctx.fillRect(0, l / 2 + 25, 25, l / 2 - 25);
-        ctx.strokeRect(175, ((l / 2) - 50), 150, 100);
-        ctx.strokeRect(75, 50, l - 150, 25);
-        ctx.strokeRect(75, l / 2 + 100, 50, 25);
-        ctx.strokeRect(175, l / 2 + 100, 150, 25);
-        ctx.strokeRect(375, l / 2 + 100, 50, 25);
-        ctx.strokeRect(75, l / 2 - 50, 50, 100);
-        ctx.strokeRect(375, l / 2 - 50, 50, 100);
+        roundRect(ctx, 0, -5, 25, l / 2 - 25, 5, "blue");
+        roundRect(ctx, 0, l / 2 + 25, 25, l / 2 - 20, 5, "blue");
+        roundRect(ctx, l - 25, -5, 25, l / 2 - 25, 5, "blue");
+        roundRect(ctx, l - 25, l / 2 + 25, 25, l / 2 - 20, 5, "blue");
 
-        ctx.strokeRect(75, 125, 50, 25);
-        ctx.strokeRect(175, 125, 150, 25);
-        ctx.strokeRect(375, 125, 50, 25);
-        ctx.strokeRect(75, l / 2 + 175, l - 150, 25);
-        ctx.fillRect(l - 25, 0, 25, l / 2 - 25);
-        ctx.fillRect(l - 25, l / 2 + 25, 25, l / 2 - 25);
-        ctx.moveTo(l / 2 - 75, l / 2 - 50);
-        ctx.lineTo(l / 2 + 75, l / 2 - 50);
+        roundRect(ctx, 175, l / 2 - 50, 150, 100);
+        roundRect(ctx, 75, 50, l - 150, 25);
+        roundRect(ctx, 75, l / 2 + 100, 50, 25);
+        roundRect(ctx, 175, l / 2 + 100, 150, 25);
+        //roundRect(ctx, 275, l / 2 + 100, 50, 25);
+        roundRect(ctx, 375, l / 2 + 100, 50, 25);
+        roundRect(ctx, 75, l / 2 - 50, 50, 100);
+        roundRect(ctx, 375, l / 2 - 50, 50, 100);
+
+        roundRect(ctx, 75, l / 2 + 175, l - 150, 25);
+        roundRect(ctx, 75, 125, 50, 25);
+        roundRect(ctx, 175, 125, 150, 25);
+        roundRect(ctx, 375, 125, 50, 25);
+
+        roundRect(ctx, -25, -25, 0, 0);
+
+        ctx.moveTo(l / 2 - 70, l / 2 - 50);
+
+        ctx.lineTo(l / 2 + 70, l / 2 - 50);
         ctx.lineWidth = 8;
         ctx.strokeStyle = "green";
         ctx.stroke();
