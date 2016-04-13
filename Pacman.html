@@ -24,9 +24,9 @@
 
     var l = 500; // width/height of the canvas
     var x = 250;
-    var y = 25;
+    var y = l - 100;
     var dotArray = [];
-    var powerDotArray = [[25, 75], [l - 25, 75], [25, l - 125], [l - 25, l - 125]];
+    var powerDotArray = [[50, 75], [l - 50, 75], [50, l - 75], [l - 50, l - 75]];
 
     initDotArray();
     placeBackground();
@@ -55,12 +55,12 @@
         }
         //left
         else if (e.keyCode == '37'  || e.keyCode == '97' || e.keyCode == '65') {
-            if (x > 25 && isOnTrack(x - 5, y)) x -= 5;
+            if (x > 0 && isOnTrack(x - 5, y)) x -= 5;
             open ? placePacman("l") : placePaclosed();
         }
         //right
         else if (e.keyCode == '39' || e.keyCode == '100' || e.keyCode == '68') {
-            if (x < (l - 25) && isOnTrack(x + 5, y)) x += 5;
+            if (x < l && isOnTrack(x + 5, y)) x += 5;
             open ? placePacman("r") : placePaclosed();
         }
         //reload
@@ -118,14 +118,25 @@
     function placeBackground() {
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, l, l);
-        ctx.fillStyle = "gray";
+        ctx.fillStyle = "blue";
         ctx.strokeStyle = "blue";
         ctx.lineWidth = 7;
-        ctx.strokeRect(150, ((l / 2) - 50), l - 300, 100);
-        ctx.strokeRect(50, 50, (l / 4), 100);
-        ctx.strokeRect(50, l - 150, (l / 2 - 75), 100);
-        ctx.strokeRect(l / 2 + 25, 50, (l / 2 - 75), 100);
-        ctx.strokeRect((l / 2 + 25), l - 150, (l / 2 - 75), 100);
+        ctx.fillRect(0, 0, 25, l / 2 - 25);
+        ctx.fillRect(0, l / 2 + 25, 25, l / 2 - 25);
+        ctx.strokeRect(175, ((l / 2) - 50), 150, 100);
+        ctx.strokeRect(75, 50, l - 150, 25);
+        ctx.strokeRect(75, l / 2 + 100, 50, 25);
+        ctx.strokeRect(175, l / 2 + 100, 150, 25);
+        ctx.strokeRect(375, l / 2 + 100, 50, 25);
+        ctx.strokeRect(75, l / 2 - 50, 50, 100);
+        ctx.strokeRect(375, l / 2 - 50, 50, 100);
+
+        ctx.strokeRect(75, 125, 50, 25);
+        ctx.strokeRect(175, 125, 150, 25);
+        ctx.strokeRect(375, 125, 50, 25);
+        ctx.strokeRect(75, l / 2 + 175, l - 150, 25);
+        ctx.fillRect(l - 25, 0, 25, l / 2 - 25);
+        ctx.fillRect(l - 25, l / 2 + 25, 25, l / 2 - 25);
         ctx.moveTo(l / 2 - 75, l / 2 - 50);
         ctx.lineTo(l / 2 + 75, l / 2 - 50);
         ctx.lineWidth = 8;
@@ -143,42 +154,49 @@
 
     function isOnTrack(a, b) {
         var onTrack = false;
-        if(onLine(a, b, 25, 25, 25, l - 25)) onTrack = true;
-        else if(onLine(a, b, l - 25, 25, l - 25, l - 25)) onTrack = true;
-        else if(onLine(a, b, 25, 25, l - 25, 25)) onTrack = true;
-        else if(onLine(a, b, 25, l / 2 - 75, l - 25, l / 2 - 75)) onTrack = true;
-        else if (onLine(a, b, 25, l / 2 + 75, l - 25, l / 2 + 75)) onTrack  = true;
-        else if (onLine(a, b, 25, l - 25, l - 25, l - 25)) onTrack = true;
-        else if(onLine(a, b, l / 2, 25, l / 2, l / 2 - 75)) onTrack = true;
-        else if(onLine(a, b, l / 2, l / 2 + 75, l / 2, l - 25)) onTrack = true;
+        if(onLine(a, b, 50, 25, 50, l - 25)) onTrack = true;
+        else if(onLine(a, b, l - 50, 25, l - 50, l - 25)) onTrack = true;
+        else if(onLine(a, b, 50, 25, l - 50, 25)) onTrack = true;
+        else if(onLine(a, b, 50, l / 2 - 75, l - 50, l / 2 - 75)) onTrack = true;
+        else if (onLine(a, b, 50, l / 2 + 75, l - 50, l / 2 + 75)) onTrack  = true;
+        else if (onLine(a, b, 50, l - 25, l - 50, l - 25)) onTrack = true;
+        else if(onLine(a, b, 50, 100, l - 50, 100)) onTrack = true;
+        else if(onLine(a, b, 50, l - 100, l - 50, l - 100)) onTrack = true;
+        else if(onLine(a, b, 150, 100, 150, l - 100)) onTrack = true;
+        else if(onLine(a, b, l - 150, 100, l - 150, l - 100)) onTrack = true;
+        else if(onLine(a, b, -5, l / 2, 50, l / 2)) onTrack = true;
+        else if(onLine(a, b,l - 5, l / 2, l - 50, l / 2)) onTrack = true;
         return onTrack;
     }
 
     function initDotArray() {
-        for (var i = 50; i <= l - 50; i += 25) {
+        for (var i = 75; i <= l - 75; i += 25) {
             dotArray.push([i, 25]);
+            dotArray.push([i, 100]);
+            dotArray.push([i, 400]);
             dotArray.push([i, (l / 2) - 75]);
             dotArray.push([i, (l / 2) + 75]);
             dotArray.push([i, l - 25]);
         }
         for(var j = 25; j <= l - 25; j += 25) {
-            dotArray.push([25, j]);
-            dotArray.push([l - 25, j]);
+            dotArray.push([50, j]);
+            dotArray.push([l - 50, j]);
         }
-        for(var k = 50; k <= 150; k += 25) {
-            dotArray.push([l / 2, k]);
-            dotArray.push([l / 2, l - k]);
+        for(var k = 125; k <= l - 125; k += 25) {
+        if(k != 100 || k != l / 2 - 75 || k != l / 2 + 75|| k != 400) {                   dotArray.push([150, k]);
+            dotArray.push([l - 150, l - k]);
+            }
         }
 
-        delElem([l / 2, 175], dotArray);
+        //delElem([l / 2, 175], dotArray);
         //delElem([l / 2 - 25, 175], dotArray);
         //delElem([l / 2 + 25, 175], dotArray);
         //delElem([l / 2, 150], dotArray);
 
-        delElem([25, 75], dotArray);
-        delElem([l - 25, 75], dotArray);
-        delElem([25, l - 125], dotArray);
-        delElem([l - 25, l - 125], dotArray);
+        delElem([50, 75], dotArray);
+        delElem([l - 50, 75], dotArray);
+        delElem([50, l - 75], dotArray);
+        delElem([l - 50, l - 75], dotArray);
     }
 
     function placeDots() {
@@ -193,7 +211,9 @@
         ctx.strokeStyle = "white";
         ctx.stroke();
         ctx.lineWidth = 1;
+    }
 
+    function placePowerDots() {
         for(var j = 0; j < powerDotArray.length; j++) {
             var pdotx = powerDotArray[j][0];
             var pdoty = powerDotArray[j][1];
@@ -236,7 +256,7 @@
         }
     }
 
-    function drawGhost(x, y, radius, color, dir,tentDir) {
+    function drawGhost(x, y, radius, color, dir, tentDir) {
         ctx.fillStyle = color;
         ctx.beginPath();
         ctx.arc(x, y, radius, Math.PI, 0, false);
@@ -365,12 +385,11 @@
     var count = 1;
     var tentDir = "l";
     var powerful = false;
-
     setInterval(function() {
-        if(count == Math.round(duration / 8)) moveOut("blinky");
-        if(count == Math.round(duration / 4)) moveOut("pinky");
-        if(count == Math.round(3 * duration / 8)) moveOut("inky");
-        if(count == Math.round(duration / 2)) moveOut("clyde");
+        if(count == Math.round(duration / 4)) moveOut("blinky");
+        if(count == Math.round(duration / 2)) moveOut("pinky");
+        if(count == Math.round(3 * duration / 4)) moveOut("inky");
+        if(count == duration) moveOut("clyde");
         var move_blinky = moveRandom(blinky_x, blinky_y, dir_blinky);
         var move_pinky = moveRandom(pinky_x, pinky_y, dir_pinky);
         var move_inky = moveRandom(inky_x, inky_y, dir_inky);
@@ -390,6 +409,7 @@
         clearCanvas();
         placeBackground();
         placeDots();
+        placePowerDots();
         ctx.moveTo(x, y);
         placePaclosed();
 
@@ -400,11 +420,51 @@
         if(collide(pinky_x, pinky_y, clyde_x, clyde_y)) dir_pinky = revDir(dir_pinky);
         if(collide(inky_x, inky_y, clyde_x, clyde_y)) dir_inky = revDir(dir_inky);
 
-        if (collide(x, y, blinky_x, blinky_y) || collide(x, y, pinky_x, pinky_y) ||
-            collide(x, y, inky_x, inky_y) || collide(x, y, clyde_x, clyde_y) && powerful == false) {
+        if (collide(x, y, blinky_x, blinky_y) || collide(x, y, pinky_x, pinky_y) || collide(x, y, inky_x, inky_y) || collide(x, y, clyde_x, clyde_y) && powerful == false) {
             //pacmanDeath();
-            alert("Game Over");
-            window.location.reload();
+           // alert("Game Over");
+           // window.location.reload();
+        }
+
+        if(x == 20) {
+            x = l - 30;
+            placePacman("l");
+        }
+        else if(x == l - 20) {
+            x = 30;
+            placePacman("r");
+        }
+        if(blinky_x == 20){
+            blinky_x = l - 30;
+            dir_blinky = "l";
+        }
+        else if(blinky_x == l - 20) {
+            blinky_x = 30;
+            dir_blinky = "r";
+        }
+        if(pinky_x == 20) {
+            pinky_x = l - 30;
+            dir_pinky = "l";
+        }
+        else if(pinky_x == l - 20) {
+            pinky_x = 30;
+            dir_pinky = "r";
+        }
+        if(inky_x == 20){
+            inky_x = l - 30;
+            dir_inky = "l";
+        }
+        else if(inky_x == l - 20) {
+            inky_x = 30;
+            dir_inky = "r";
+        }
+        if(clyde_x == 20){
+            clyde_x = l - 30;
+            dir_clyde = "l";
+        }
+        else if(clyde_x == l - 20) {
+            clyde_x = 30;
+            dir_clyde = "r";
         }
 
         drawGhost(blinky_x, blinky_y, 18, "red", dir_blinky, tentDir);
@@ -415,7 +475,7 @@
         if(tentDir == "r") tentDir = "l";
         else if(tentDir == "l")tentDir = "r";
 
-        if(count <= duration)count++;
+        if(count <= duration) count++;
     }, duration);
     
     function collide(x1, y1, x2, y2) {
