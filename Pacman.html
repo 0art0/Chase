@@ -8,7 +8,13 @@
         style="border:10px solid blue;" ></canvas>
 <body>
 
-<div align = "left" id="score"><h2><b>Score: </b></h2></div>
+<div align = "left">
+    <h1 id = "score" style="text-align:left;float:left;"><span style="font-size:32px;color:dodgerblue;background-color:black;">SCORE: </span></h1>
+    <h1 id = "lives" style="text-align:center;float:left;"><b>Lives: &nbsp; &nbsp; &nbsp; &nbsp;</b></h1>
+    <h1 id = "highscore" style="text-align:left;float:left;"><b>High-score:&nbsp;</b></h1>
+    <hr style="clear:both;"/>
+</div>
+
 <script src="script1.js"></script>
 <script src="another_pacman.js"></script>
 <script id = "Pacman">
@@ -19,10 +25,9 @@
     var level = 1;
     var timer_running = false;
     var lives=3;
-    var eating_sound;
     var is_powerful;
     var is_scared;
-    var score;
+    var score=0;
     var set;
     var open = true;
     var blink=0;
@@ -30,6 +35,8 @@
     var tentDir;
     var duration;
     var count;
+    var high_score;
+    high_score = (high_score === undefined || score > high_score) ? score : high_score;
     var scare_clock;
     var seconds;
     var eaten_dots = [];
@@ -51,11 +58,19 @@
     var clockcount = 0;//clock tick counter
     var step = 5; //how much does an object move in a step, should be a divisor of 25
 
+    var eat_ghost = new Audio("eatghost.mp3");
+    var eating = new Audio("eating_short.mp3");
+    var eat_pill = new Audio("eatpill.mp3");
+    var opening_song = new Audio("opening_song.mp3");
+    var siren = new Audio("siren.mp3");
+    var die = new Audio("die.mp3");
+
+    var strawberry = new Image();
+    strawberry.src = "strawberry.png";
     function clearCanvas() {
         ctx.clearRect(0, 0, l, l);
         ctx.beginPath();
     }
-
     function placeBackground() {
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, l, l);
@@ -117,7 +132,6 @@
                 ctx.fill();
                 ctx.closePath();
             }
-
     }
     function initDots() {
         for (var i = 75; i <= l - 75; i += 25) {
@@ -177,6 +191,17 @@
         ctx.arc(a + radius / 2.5, b - radius / 5 , radius / 8, 0, Math.PI * 2, true);
         ctx.fill();
     }
+
+    function removeDuplicates(array) {
+        for(var i = 0; i < array.length; i++) {
+            for(var j = 0; j < array.length; j++) {
+                if(array[j] == array[i] && j != i) {
+                    array.splice(j, 1);
+                }
+            }
+        }
+    }
+
     //a,b are location coordinates, col is overall color
     function placePacman(a,b,d,col){
         var r = 13;
@@ -249,7 +274,6 @@
         placeDots();
         placePacman(x,y,dir,"yellow");
         removeDot(x,y);
-
         for(var i=0;i<monsters.length;i++){
             drawGhost(monsters[i][0],monsters[i][1], 15, monsters[i][2],"white","blue", "black", "u", "l");
         }
@@ -262,7 +286,6 @@
         }
         return(tmp);
     }
-
     function find(arr,p) {
         for (var i=0;i<arr.length;i++) {
             if ((arr[i][0]==p[0]) && (arr[i][1]==p[1])) {return(i);}
@@ -281,12 +304,9 @@
             ctx.arc(d[0], d[1], 2, 0, 2 * Math.PI);
             ctx.stroke();
             ctx.fill();
-
         }
         //   console.log("the ghost is at", [a,b]);
-        for(i=0;i<power_dots.length;i++) {
-            //   console.log(power_dots[i]);
-        }
+
         idx = findNeighbors(power_dots, [a,b]);
         //      console.log("power dot index is", idx);
         for(i=0;i<idx.length;i++) {
@@ -303,6 +323,9 @@
     }
     //remove dot at location a,b
     function removeDot(a,b) {
+        //eating.play();
+        removeDuplicates(eaten_dots);
+        if(a == x && b == y) eaten_dots.push([a, b]);
         var idx = find(dots,[a,b]);
         if (idx>=0) {
             dots.splice(idx,1);
@@ -310,7 +333,8 @@
                 score+=20;
             }
             else times++;
-            document.getElementById("score").innerHTML = "<h2> <b> Score: " + score + "</b> </h2>";
+            //eating.play();
+            //document.getElementById("score").innerHTML = score + "";
         }
         idx = find(power_dots, [a,b]);
         if(idx>=0) {
@@ -319,12 +343,11 @@
                 score+=100;
             }
             else times++;
-            document.getElementById("score").innerHTML = "<h2> <b> Score: " + score + "</b> </h2>";
+            eat_pill.play();
+            //document.getElementById("score").innerHTML = "<h2> <b> Score: " + score + "</b> </h2>";
             is_powerful=1;
         }
-        return;
     }
-
     function redrawPacman(prevX,prevY) {
         placePacman(prevX,prevY,0,"black");
         placePacman(x,y,dir,"yellow");
@@ -353,7 +376,6 @@
             ctx.lineTo(x + radius, y + radius);
             ctx.lineTo(x + radius, y);
         }
-
         else if (tentDir == "r") {
             ctx.moveTo(x + radius, y);
             ctx.lineTo(x + radius, y + radius);
@@ -372,7 +394,6 @@
             ctx.lineTo(x - radius, y + radius);
             ctx.lineTo(x - radius, y);
         }
-
         //ctx.stroke();
         // left eye
         ctx.fill();
@@ -380,10 +401,8 @@
         ctx.beginPath();
         ctx.arc(x - radius / 2.5, y - radius / 5, radius / 3, 0, Math.PI * 2, true);
         ctx.fill();
-
         ctx.beginPath();
         ctx.fillStyle = c2;
-
         switch (dir) {
             case "u":
                 ctx.arc(x - radius / 2.5, y - radius / 5 - (5 * radius / 24), radius / 8, 0, Math.PI * 2, true);
@@ -429,8 +448,7 @@
         }
         ctx.fill();
     }
-
-        function redrawGhost(prevX,prevY,index,freight) {
+    function redrawGhost(prevX,prevY,index,freight) {
         if(freight == undefined)
             placeGhost(prevX,prevY,"black","black","black", "black", 18);
         redrawDot(prevX,prevY);
@@ -443,7 +461,6 @@
             placeGhost(monsters[index][0],monsters[index][1],"black","white","blue", "black", 23);
         }
     }
-
     function redrawGhost2(prevX, prevY, index, freight) {
         drawGhost(prevX,prevY, 20,"black", "black", "black", "black", monsters[index][3], tentDir);
         redrawDot(prevX, prevY);
@@ -472,6 +489,20 @@
         if(prevDir == "l") moves.splice(moves.indexOf("r"), 1);
         if(prevDir == "r") moves.splice(moves.indexOf("l"), 1);
         var move = moves[Math.floor(Math.random() * moves.length)];
+        var d = 2000;
+        var idx;
+        for(var i=0;i<moves.length;i++) {
+            if(moves[i] == "d")
+                if(distance([x,y],[inx,iny+5]) < d) d=distance([x,y+5],[inx,iny]); idx = i;
+            if(moves[i] == "u")
+                if(distance([x,y],[inx,iny-5]) < d) d=distance([x,y-5],[inx,iny]); idx = i;
+            if(moves[i] == "r")
+                if(distance([x,y],[inx+5,iny]) < d) d=distance([x+5,y],[inx,iny]); idx = i;
+            if(moves[i] == "l")
+                if(distance([x,y],[inx-5,iny]) < d) d=distance([x-5,y],[inx,iny]); idx = i;
+        }
+        //     console.log("End of function");
+        var move = moves[idx];
         var a = inx, b = iny;
         var temp=0;
         switch(move) {
@@ -495,7 +526,6 @@
         if(temp == 1) return [a,b,opposite_direction(move)];
         else return [a, b, move];
     }
-
     function onLine(a, b, x1, y1, x2, y2){
         if ((x1==x2) && (Math.abs(x1-a)==0) && (y1<=b && b<=y2)) {return(true)}
         if ((y1==y2) && (Math.abs(y1-b)==0) && (x1<=a && a<=x2)) {return(true)}
@@ -591,14 +621,14 @@
         }, 10);
     }
     function moveOut(w) {
-                var moveOut  = setInterval(function() {
-                    if(monsters[w][1] <= 175) clearInterval(moveOut);
-                    else {
-                        monsters[w][1] = monsters[w][1] - 1;
-                        redrawGhost2(monsters[w][0], monsters[w][1], w, 0);
-                    }
-                }, duration);
-        }
+        var moveOut  = setInterval(function() {
+            if(monsters[w][1] <= 175) clearInterval(moveOut);
+            else {
+                monsters[w][1] = monsters[w][1] - 1;
+                redrawGhost2(monsters[w][0], monsters[w][1], w, 0);
+            }
+        }, duration);
+    }
     function collision(x1,y1,r1,x2,y2,r2) {
         if(distance([x1,y1], [x2,y2]) < (r1+r2)) return (true);
         else return(false);
@@ -606,6 +636,7 @@
     function update() {
         clockcount++;
         //update pacman
+        siren.play();
         prevX = x;
         prevY = y;
         if (admits(nextdir, x, y)) {
@@ -617,12 +648,12 @@
                 case -1:
                     if (x == 25 && y == l / 2) x = l - 30;
                     else
-                     x = x - step;
+                        x = x - step;
                     break;
                 case 1:
                     if (x == l - 30 && y == l / 2) x = 30;
                     else
-                    x = x + step;
+                        x = x + step;
                     break;
                 case 2:
                     y = y - step;
@@ -633,16 +664,18 @@
                 default:
                     break;
             }
+            for(var i = 0; i < dots.length; i++) {
+                if(dots[i][0] == x && dots[i][1] == y) eating.play();
+            }
             removeDot(x, y); //if seed at x,y exists in dots, remove from dots
+
             redrawPacman(prevX, prevY); //erase pacman from prevX,prevY, draw at x,y
         }
-
         // move ghosts out of the ghost house
         if (count == Math.round(duration / 4)) moveOut(0);
         if (count == Math.round(duration / 2)) moveOut(2);
         if (count == Math.round(3 * duration / 4)) moveOut(1);
         if (count == duration) moveOut(3);
-
         //update ghost
         if (scare_clock == 0) {
             for (var i = 0; i < monsters.length; i++) {
@@ -656,7 +689,6 @@
                     prevX = monsters[i][0];
                     prevY = monsters[i][1];
                     //make ghost move towards pacman by picking the admissible direction that takes it closest
-
                     move = moveRandom(prevX, prevY, monsters[i][3]);
                     //       console.log(gx, gy);
                     monsters[i][0] = move[0];
@@ -692,7 +724,6 @@
                         monsters[i][3] = opposite_direction(monsters[i][3]);
                     }
                     redrawGhost2(prevX, prevY, i, 1);
-
                     seconds = 1;
                     power_clock++;
                 }
@@ -724,7 +755,6 @@
                 var prevX = monsters[i][0];
                 var prevY = monsters[i][1];
                 //make ghost move towards pacman by picking the admissible direction that takes it closest
-
                 move = moveRandom(prevX, prevY, monsters[i][3]);
                 monsters[i][0] = move[0];
                 monsters[i][1] = move[1];
@@ -732,9 +762,16 @@
                 redrawGhost2(prevX, prevY, i, 0); //erase ghost from prevX,prevY, draw at gx,gy
             }
         }
-
         if(tentDir == "r") tentDir = "l";
         else if(tentDir == "l") tentDir = "r";
+
+        if(eaten_dots.length >= 55 && eaten_dots.length <= 75) {
+            ctx.drawImage(strawberry, l / 2- 20, l / 2 + 130, 40, 40);
+            if(x == l / 2 && y == l - 100) {
+                score += 150;
+                alert("fruit eaten");
+            }
+        }
 
         if(x <= 20) {
             clear_pacman(x, y, 15, "black");
@@ -746,54 +783,57 @@
             x = 30;
             placePacman(x, y, 1, "yellow");
         }
-
         for(var i = 0; i < monsters.length; i++) {
             if(monsters[i][0] <= 20) {
+                var tx=monsters[i][0];
+                var ty=monsters[i][1];
                 //drawGhost(monster[i][0], monster[i][1], 18, "black", "black", "black", "black", "l", "l");
                 monsters[i][0] = l - 30;
-                //redrawGhost(monster[i][0], monster[i][1], i, 0);
+                redrawGhost2(tx, ty, i, 0);
             }
             else if(monsters[i][0] >= l - 20) {
                 //drawGhost(monster[i][0], monster[i][1], 18, "black", "black", "black", "black", "l", "l");
+                var tx=monsters[i][0];
+                var ty=monsters[i][1];
                 monsters[i][0] = 30;
-                //drawGhost(monster[i][0], monster[i][1], 18, monsters[i][2], "white", "blue", "black", "r", "l");
+                redrawGhost2(tx,ty,i,0);
             }
         }
-
         for (i = 0; i < monsters.length; i++) {
             if (collision(monsters[i][0], monsters[i][1], 15, x, y, 13)) {
                 if (is_powerful && power_clock < 500) {
                     score += 150;
+                    eat_ghost.play();
                     scare_clock++;
                     monsters[i][4] = 1;
                 }
                 else {
-                    /*redrawGhost(monsters[0][0], monsters[0][1], 0);
-                    redrawGhost(monsters[1][0], monsters[1][1], 1);
-                    redrawGhost(monsters[2][0], monsters[2][1], 2);
-                    redrawGhost(monsters[3][0], monsters[3][1], 3);
-                    pacmanDeath();
-                    stop_game();
-                    if (lives > 0) {
-                        lives--;
-                        setTimeout(function () {
-                                    alert("You lose");
-                                    initialize();
-                                    draw();
-                                }
-                                , 2000);
-                    }
-                    else {
-                        setTimeout(function () {
-                                    alert("Game Over.");
-                                    window.location.reload();
-                                }
-                                , 2000);
-                    }*/
+                    redrawGhost(monsters[0][0], monsters[0][1], 0);
+                     redrawGhost(monsters[1][0], monsters[1][1], 1);
+                     redrawGhost(monsters[2][0], monsters[2][1], 2);
+                     redrawGhost(monsters[3][0], monsters[3][1], 3);
+                     die.play();
+                     pacmanDeath();
+                     stop_game();
+                     if (lives > 0) {
+                     lives--;
+                     setTimeout(function () {
+                     alert("You lose");
+                     initialize();
+                     draw();
+                     }
+                     , 2000);
+                     }
+                     else {
+                     setTimeout(function () {
+                     alert("Game Over.");
+                     window.location.reload();
+                     }
+                     , 2000);
+                     }
                 }
             }
         }
-
         //clearCanvas();
         //console.log(dots.length, power_dots.length);
         if (dots.length == 0 && power_dots.length == 0) {
@@ -803,20 +843,21 @@
         }
         if (count <= duration) count += 1;
     }
-
     function play_game() {
         initialize();
         draw();
-        timer_running = true;
-        timer = setInterval(update, 40);
-        window.addEventListener("keydown", keydn, true);
+        opening_song.play();
+        setTimeout(function() {
+            timer_running = true;
+            timer = setInterval(update, 40);
+            window.addEventListener("keydown", keydn, true);
+        }, 4000)
     }
     function stop_game() {
         clearInterval(timer);
         timer_running = false;
         window.removeEventListener("keydown", keydn, true);
     }
-
 </script>
 
 
