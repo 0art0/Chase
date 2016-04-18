@@ -9,7 +9,7 @@
 <body>
 
 <div align = "left">
-    <h1 id = "score" style="text-align:left;float:left;"><span style="font-size:32px;color:dodgerblue;background-color:black;">SCORE: </span></h1>
+    <h1 id = "score" style="text-align:left;float:left;">SCORE: &nbsp; &nbsp; &nbsp; &nbsp; </span></h1>
     <h1 id = "lives" style="text-align:center;float:left;"><b>Lives: &nbsp; &nbsp; &nbsp; &nbsp;</b></h1>
     <h1 id = "highscore" style="text-align:left;float:left;"><b>High-score:&nbsp;</b></h1>
     <hr style="clear:both;"/>
@@ -65,8 +65,16 @@
     var siren = new Audio("siren.mp3");
     var die = new Audio("die.mp3");
 
+    var cherry = new Image();
     var strawberry = new Image();
+    var orange = new Image();
+    var apple = new Image();
+
+    cherry.src = "cherry.png";
     strawberry.src = "strawberry.png";
+    orange.src = "orange.png";
+    apple.src = "apple.png";
+
     function clearCanvas() {
         ctx.clearRect(0, 0, l, l);
         ctx.beginPath();
@@ -324,10 +332,9 @@
     //remove dot at location a,b
     function removeDot(a,b) {
         //eating.play();
-        removeDuplicates(eaten_dots);
-        if(a == x && b == y) eaten_dots.push([a, b]);
         var idx = find(dots,[a,b]);
         if (idx>=0) {
+            if(a == x && b == y) eaten_dots.push([a, b]);
             dots.splice(idx,1);
             if(times > 0) {
                 score+=20;
@@ -765,11 +772,35 @@
         if(tentDir == "r") tentDir = "l";
         else if(tentDir == "l") tentDir = "r";
 
-        if(eaten_dots.length >= 55 && eaten_dots.length <= 75) {
+        ctx.fillStyle = "black";
+
+        if(eaten_dots.length >= 25 && eaten_dots.length <= 35) {
+            ctx.drawImage(cherry, l / 2 - 20, l / 2 + 130, 40, 40);
+            if (x == l / 2 && y == l - 100) {
+                score += 150;
+                alert("Fruit Eaten");
+            }
+        }
+
+        if(eaten_dots.length == 50) {
             ctx.drawImage(strawberry, l / 2- 20, l / 2 + 130, 40, 40);
             if(x == l / 2 && y == l - 100) {
                 score += 150;
-                alert("fruit eaten");
+                alert("Fruit Eaten");
+            }
+        }
+        else if(eaten_dots.length >= 75) {
+            ctx.drawImage(orange, l / 2- 20, l / 2 + 130, 40, 40);
+            if(x == l / 2 && y == l - 100) {
+                score += 150;
+                alert("Fruit Eaten");
+            }
+        }
+        else if(eaten_dots.length >= 100) {
+            ctx.drawImage(apple, l / 2- 20, l / 2 + 130, 40, 40);
+            if(x == l / 2 && y == l - 100) {
+                score += 150;
+                alert("Fruit Eaten");
             }
         }
 
@@ -808,7 +839,7 @@
                     monsters[i][4] = 1;
                 }
                 else {
-                    redrawGhost(monsters[0][0], monsters[0][1], 0);
+                     redrawGhost(monsters[0][0], monsters[0][1], 0);
                      redrawGhost(monsters[1][0], monsters[1][1], 1);
                      redrawGhost(monsters[2][0], monsters[2][1], 2);
                      redrawGhost(monsters[3][0], monsters[3][1], 3);
